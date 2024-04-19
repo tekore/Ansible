@@ -1,6 +1,6 @@
-#---
-#plugin: aws_ec2
-#hostnames: ip-address, network-interface.addresses.private-ip-address
-#groups:
-#  MONITOR: "'cloud_monitor' in tags.Name"
-#  VPN: "'cloud_vpn' in tags.Name"
+---
+plugin: aws_ec2
+hostnames: ip-address, network-interface.addresses.private-ip-address
+groups:
+  MONITOR: "'cloud_monitor' in tags.Name"
+  VPN: "'cloud_vpn' in tags.Name"
