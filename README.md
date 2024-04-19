@@ -14,9 +14,13 @@ Variable Ansible playbooks I use for Automation
 $ git clone https://github.com/tekore/Ansible
 ```
 
-- Run the script
+- Run a playbook in push mode:
 ```sh
-$ ansible-playbook ./playbook
+$ ansible-playbook <PLAYBOOK>.yml
+```
+- Run a playbook in pull mode:
+```sh
+$ ansible-pull -U https://github.com/tekore/Ansible.git roles/microk8s/mk8s.yml
 ```
 
 ## Maintainers
