@@ -1,38 +1,40 @@
-- name: Install microk8s
+- hosts: localhost
   connection: local
-  become: yes
-  hosts: localhost
-  tasks:
-    - community.general.snap:
-        classic: true
-        name:
-          - microk8s
+  - name: Install microk8s
+    #connection: local
+    become: yes
+    #hosts: localhost
+    tasks:
+      - community.general.snap:
+          classic: true
+          name:
+            - microk8s
 
-- name: Adding user to group
-  connection: local
-  become: yes
-  hosts: localhost
-  tasks:
-    - user:
-        name: tekore
-        groups: microk8s
-        append: yes
-    - meta: reset_connection
+  - name: Adding user to group
+    #connection: local
+    become: yes
+    #hosts: localhost
+    tasks:
+      - user:
+          name: tekore
+          groups: microk8s
+          append: yes
+      - meta: reset_connection
 
-- name: Change kube folder ownership
-  connection: local
-  become: yes
-  hosts: localhost
-  tasks:
-    - file:
-        path: /home/tekore/.kube
-        owner: tekore
-        group: tekore
-        state: directory
+  - name: Change kube folder ownership
+    #connection: local
+    become: yes
+    #hosts: localhost
+    tasks:
+      - file:
+          path: /home/tekore/.kube
+          owner: tekore
+          group: tekore
+          state: directory
 
-- name: Enable microk8s common modules
-  connection: local
-  become: yes
-  hosts: localhost
-  tasks: 
-    - command: microk8s enable dns cert-manager ingress hostpath-storage
+  - name: Enable microk8s common modules
+    #connection: local
+    become: yes
+    #hosts: localhost
+    tasks: 
+      - command: microk8s enable dns cert-manager ingress hostpath-storage
