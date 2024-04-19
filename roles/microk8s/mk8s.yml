@@ -32,16 +32,16 @@
         group: tekore
         state: directory
 
+- name: Disable unused microk8s modules
+  connection: local
+  become: yes
+  hosts: localhost
+  tasks: 
+    - command: microk8s disable ha-cluster --force
+
 - name: Enable microk8s common modules
   connection: local
   become: yes
   hosts: localhost
   tasks: 
     - command: microk8s enable dns cert-manager ingress hostpath-storage
-
-- name: Disable unused microk8s modules
-  connection: local
-  become: yes
-  hosts: localhost
-  tasks: 
-    - command: microk8s disable ha-cluster
