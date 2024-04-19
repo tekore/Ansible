@@ -1,0 +1,1 @@
+"{{ vars.wireguard_priv_key.key }}"

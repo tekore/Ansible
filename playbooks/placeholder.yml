@@ -1,0 +1,12 @@
+---
+- name: Placeholder
+  hosts: 
+  gather_facts: no
+  remote_user: 
+  connection: 
+  roles:
+    - 
+  vars_files:
+    - ./../roles/ /vars/vars.yml
+  vars:
+    ansible_ssh_private_key_file: 

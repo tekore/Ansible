@@ -1,0 +1,34 @@
+files:
+  repos_config: ./../files/repos/default-repos.list 
+  repos_dest: /etc/apt/sources.list.d/default-ubuntu-repos.list
+  fail2ban_config: ./../files/fail2ban/defaults-debian.conf 
+  fail2ban_dest: /etc/fail2ban/jail.d/defaults-debian.conf
+  wireguard_config: ./../files/wireguard/wg0.conf
+  wireguard_dest: /etc/wireguard/wg0.conf
+  duckdns_dir: /duckdns
+  duckdns_script: ./../files/duckdns/duck.sh
+  duckdns_dest: /duckdns/duck.sh
+
+firewall_ports:
+  ssh: 22
+  vpn: 1094
+
+firewall_networks:
+  tunnel: 10.8.0.0/24
+  internal: 10.154.1.0/24
+  internal2: 10.155.1.0/24
+  internal3: 10.156.1.0/24
+  external: 0.0.0.0/0
+
+duckdns:
+  addr: url='https://www.duckdns.org/update?domains=<REDACTED>'
+
+wireguard:
+  priv_key: <REDACTED>
+  pub_key: <REDACTED>
+  pub_xps: <REDACTED>
+
+wireguard_ips:
+  1: 10.8.0.1/24
+  2: 10.8.0.2
+  3: 10.154.1.0/24
