@@ -1,47 +1,89 @@
 ---
-
-- name: Install microk8s
+- name: Configure Server
   connection: local
-  become: yes
+  become: true
+  become_user: root
   hosts: localhost
   tasks:
-    - community.general.snap:
+    - name: Set hostname
+      ansible.builtin.hostname:
+        name: mk8s
+
+    - name: Install packages
+      apt:
+        pkg:
+          - ufw
+          - vim
+          - btrfs-progs
+        state: latest
+        update_cache: true
+
+    - name: Check UFW is disabled
+      ufw:
+        state: disabled
+    
+    - name: ensure the btrfs file system is there
+      command: "echo 'pit something here to check cloud init did it's job'"
+
+    - name: Create the needed directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0777
+      with_items:
+        - /var/containers/rclone
+        - /var/containers/pigallery2/config
+        - /var/containers/pigallery2/db
+        - /var/containers/pigallery2/tmp
+
+    - name: Create a symbolic link to backup directory
+      ansible.builtin.file:
+        src: /rclone_backup/Backup/Pictures
+        dest: /var/containers/pigallery2/images
+        owner: root
+        group: root
+        state: link
+        force: true
+
+    - name: Create rclone conf file
+      ansible.builtin.copy:
+        owner: root
+        group: root
+        dest: /var/containers/rclone/rclone.conf
+        content: "{{ vars.rclone_config }}"
+
+    #- name: Enable btrfs scrub cronjob
+    #  ansible.builtin.cron:
+    #    name: 
+    #    minute: "0"
+    #    hour: "0"
+    #    day: "*"
+    #    month: "*"
+    #    weekday: "0"
+    #    job: 'bash "{{ vars.btrfs scrub command }}"'
+
+    - name: Install microk8s
+      community.general.snap:
         classic: true
-        name:
-          - microk8s
+        name: "microk8s"
 
-- name: Adding user to group
-  connection: local
-  become: yes
-  hosts: localhost
-  tasks:
-    - user:
+    - name: Adding user to group
+      user:
         name: tekore
         groups: microk8s
         append: yes
-    - meta: reset_connection
 
-- name: Change kube folder ownership
-  connection: local
-  become: yes
-  hosts: localhost
-  tasks:
-    - file:
+    - name: Change kube folder ownership
+      file:
         path: /home/tekore/.kube
         owner: tekore
         group: tekore
         state: directory
 
-- name: Disable unused microk8s modules
-  connection: local
-  become: yes
-  hosts: localhost
-  tasks: 
-    - command: microk8s disable ha-cluster --force
+    - name: Disable unused microk8s modules
+      command: microk8s disable ha-cluster --force
 
-- name: Enable microk8s common modules
-  connection: local
-  become: yes
-  hosts: localhost
-  tasks: 
-    - command: microk8s enable dns cert-manager ingress hostpath-storage
+    - name: Enable microk8s common modules
+      command: microk8s enable dns cert-manager ingress hostpath-storage metrics-server
