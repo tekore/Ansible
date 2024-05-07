@@ -21,10 +21,10 @@
     - name: Check UFW is disabled
       ufw:
         state: disabled
-    
+    ###
     - name: ensure the btrfs file system is there
-      command: "echo 'pit something here to check cloud init did it's job'"
-
+      command: "echo 'put something here to check cloud init did it's job'"
+    ###
     - name: Create the needed directories
       ansible.builtin.file:
         path: "{{ item }}"
@@ -37,6 +37,8 @@
         - /var/containers/pigallery2/config
         - /var/containers/pigallery2/db
         - /var/containers/pigallery2/tmp
+        - /var/containers/jellyfin/config
+        - /var/containers/jellyfin/cache
 
     - name: Create a symbolic link to backup directory
       ansible.builtin.file:
@@ -47,12 +49,12 @@
         state: link
         force: true
 
-    - name: Create rclone conf file
-      ansible.builtin.copy:
-        owner: root
-        group: root
-        dest: /var/containers/rclone/rclone.conf
-        content: "{{ vars.rclone_config }}"
+    #- name: Create rclone conf file
+    #  ansible.builtin.copy:
+    #    owner: root
+    #    group: root
+    #    dest: /var/containers/rclone/rclone.conf
+    #    content: "{{ vars.rclone_config }}"
 
     #- name: Enable btrfs scrub cronjob
     #  ansible.builtin.cron:
