@@ -22,8 +22,8 @@
       ufw:
         state: disabled
     ###
-    - name: ensure the btrfs file system is there
-      command: "echo 'put something here to check cloud init did it's job'"
+    #- name: ensure the btrfs file system is there
+    #  command: "echo 'put something here to check cloud init did it's job'"
     ###
     - name: Create the needed directories
       ansible.builtin.file:
