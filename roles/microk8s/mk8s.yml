@@ -64,7 +64,7 @@
         day: "*"
         month: "*"
         weekday: "5"
-        job: "bash /usr/bin/btrfs scrub start /rclone_data"
+        job: "sudo /usr/bin/btrfs scrub start /rclone_data"
         state: present
 
     - name: Download offsite backup script
