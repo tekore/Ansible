@@ -51,7 +51,7 @@
 
     - name: Create a symbolic link to backup directory
       ansible.builtin.file:
-        src: /rclone_data/Backup/Pictures
+        src: /rclone_data/Pictures
         dest: /var/containers/pigallery2/images
         owner: root
         group: root
