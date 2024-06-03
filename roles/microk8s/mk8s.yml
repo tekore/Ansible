@@ -41,10 +41,11 @@
         - /var/containers/pigallery2/tmp
         - /var/containers/jellyfin/config
         - /var/containers/jellyfin/cache
+        - /rclone_data
 
     - name: Create a symbolic link to backup directory
       ansible.builtin.file:
-        src: /rclone_backup/Backup/Pictures
+        src: /rclone_data/Backup/Pictures
         dest: /var/containers/pigallery2/images
         owner: root
         group: root
@@ -58,23 +59,15 @@
     #    dest: /var/containers/rclone/rclone.conf
     #    content: "{{ vars.rclone_config }}"
 
-    #- name: Mount and bind a volume
-    #  ansible.posix.mount:
-    #  path: /system/new_volume/boot
-    #  src: /boot
-    #  opts: bind
-    #  state: mounted
-    #  fstype: ext4
-
-    #- name: Enable btrfs scrub cronjob
-    #  ansible.builtin.cron:
-    #    name: 
-    #    minute: "0"
-    #    hour: "0"
-    #    day: "*"
-    #    month: "*"
-    #    weekday: "0"
-    #    job: 'bash "{{ vars.btrfs scrub command }}"'
+    - name: Enable btrfs scrub cronjob
+      ansible.builtin.cron:
+        name: 
+        minute: "0"
+        hour: "18"
+        day: "*"
+        month: "*"
+        weekday: "5"
+        job: "bash /usr/bin/btrfs scrub start /rclone_data"
 
     - name: Install microk8s
       community.general.snap:
