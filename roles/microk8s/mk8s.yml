@@ -71,7 +71,7 @@
       ansible.builtin.get_url:
         url: "{{ url }}"
         dest: "{{ url_folder }}"
-        mode: '0664'
+        mode: '0774'
 
     - name: Install microk8s
       community.general.snap:
