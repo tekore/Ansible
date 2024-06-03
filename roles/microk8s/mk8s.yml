@@ -62,7 +62,7 @@
 
     - name: Enable btrfs scrub cronjob
       ansible.builtin.cron:
-        name: 
+        name: Scrub backup /rclone_data
         minute: "0"
         hour: "18"
         day: "*"
