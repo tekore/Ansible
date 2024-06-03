@@ -21,7 +21,6 @@
           - libgbm-dev
           - libasound-dev
           - gnome-session
-          - gdm3
           - btrfs-progs
         state: latest
         update_cache: true
@@ -48,15 +47,7 @@
         - /var/containers/jellyfin/config
         - /var/containers/jellyfin/cache
         - /rclone_data
-
-    - name: Create a symbolic link to backup directory
-      ansible.builtin.file:
-        src: /rclone_data/Pictures
-        dest: /var/containers/pigallery2/images
-        owner: root
-        group: root
-        state: link
-        force: true
+        - "{{ url_folder }}"
 
     #- name: Create rclone conf file
     #  ansible.builtin.copy:
@@ -75,6 +66,12 @@
         weekday: "5"
         job: "bash /usr/bin/btrfs scrub start /rclone_data"
         state: present
+
+    - name: Download offsite backup script
+      ansible.builtin.get_url:
+        url: "{{ url }}"
+        dest: "{{ url_folder }}"
+        mode: '0664'
 
     - name: Install microk8s
       community.general.snap:
@@ -99,6 +96,3 @@
 
     - name: Enable microk8s common modules
       command: microk8s enable dns cert-manager ingress hostpath-storage metrics-server
-
-    - name: Ensure gdm doesn't suspend the system
-      command: sudo -u gdm dbus-run-session gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing' && sudo -u gdm dbus-run-session gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
