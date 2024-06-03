@@ -15,6 +15,7 @@
           - ufw
           - vim
           - lm-sensors
+          - postfix
           - gparted
           - btrfs-progs
         state: latest
