@@ -14,6 +14,8 @@
         pkg:
           - ufw
           - vim
+          - lm-sensors
+          - gparted
           - btrfs-progs
         state: latest
         update_cache: true
@@ -55,6 +57,14 @@
     #    group: root
     #    dest: /var/containers/rclone/rclone.conf
     #    content: "{{ vars.rclone_config }}"
+
+    #- name: Mount and bind a volume
+    #  ansible.posix.mount:
+    #  path: /system/new_volume/boot
+    #  src: /boot
+    #  opts: bind
+    #  state: mounted
+    #  fstype: ext4
 
     #- name: Enable btrfs scrub cronjob
     #  ansible.builtin.cron:
