@@ -18,6 +18,8 @@
           - postfix
           - gparted
           - libfuse2
+          - libgbm-dev
+          - libasound-dev
           - btrfs-progs
         state: latest
         update_cache: true
