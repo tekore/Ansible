@@ -20,6 +20,8 @@
           - libfuse2
           - libgbm-dev
           - libasound-dev
+          - gnome-session
+          - gdm3
           - btrfs-progs
         state: latest
         update_cache: true
