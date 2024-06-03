@@ -99,3 +99,6 @@
 
     - name: Enable microk8s common modules
       command: microk8s enable dns cert-manager ingress hostpath-storage metrics-server
+
+    - name: Ensure gdm doesn't suspend the system
+      command: sudo -u gdm dbus-run-session gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing' && sudo -u gdm dbus-run-session gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
