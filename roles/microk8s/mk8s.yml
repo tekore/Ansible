@@ -17,6 +17,7 @@
           - lm-sensors
           - postfix
           - gparted
+          - libfuse2
           - btrfs-progs
         state: latest
         update_cache: true
