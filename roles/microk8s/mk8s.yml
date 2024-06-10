@@ -29,8 +29,8 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        owner: root
-        group: root
+        owner: tekore
+        group: tekore
         mode: 0777
       with_items:
         - /var/mk8s-certs
@@ -51,6 +51,17 @@
         month: "*"
         weekday: "5"
         job: "sudo /usr/bin/btrfs scrub start /NAS"
+        state: present
+
+    - name: Enable btrfs snapshot cronjob
+      ansible.builtin.cron:
+        name: Snapshot /NAS
+        minute: "0"
+        hour: "19"
+        day: "*"
+        month: "*"
+        weekday: "5"
+        job: "sudo /usr/bin/btrfs subvolume snapshot /NAS /NAS/$(date +%F-%T)"
         state: present
 
     #- name: Download offsite backup script
