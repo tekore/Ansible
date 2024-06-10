@@ -33,6 +33,7 @@
         group: root
         mode: 0777
       with_items:
+        - /var/mk8s-certs
         - /var/containers/rclone
         - /var/containers/pigallery2/config
         - /var/containers/pigallery2/db
@@ -81,3 +82,15 @@
 
     - name: Enable microk8s common modules
       command: microk8s enable dns cert-manager ingress hostpath-storage metrics-server
+
+    - name: Copy cert files
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /var/mk8s-certs/
+        owner: root
+        group: root
+        mode: '0777'
+      with_items:
+        - /var/snap/microk8s/current/certs/ca.crt
+        - /var/snap/microk8s/current/certs/client.crt
+        - /var/snap/microk8s/current/certs/client.key
