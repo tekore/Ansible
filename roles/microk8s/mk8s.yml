@@ -28,10 +28,7 @@
     - name: Check UFW is disabled
       ufw:
         state: disabled
-    ###
-    #- name: ensure the btrfs file system is there
-    #  command: "echo 'put something here to check cloud init did it's job'"
-    ###
+
     - name: Create the needed directories
       ansible.builtin.file:
         path: "{{ item }}"
@@ -46,32 +43,24 @@
         - /var/containers/pigallery2/tmp
         - /var/containers/jellyfin/config
         - /var/containers/jellyfin/cache
-        - /rclone_data
-        - "{{ url_folder }}"
-
-    #- name: Create rclone conf file
-    #  ansible.builtin.copy:
-    #    owner: root
-    #    group: root
-    #    dest: /var/containers/rclone/rclone.conf
-    #    content: "{{ vars.rclone_config }}"
+        - /NAS
 
     - name: Enable btrfs scrub cronjob
       ansible.builtin.cron:
-        name: Scrub backup /rclone_data
+        name: Scrub backup /NAS
         minute: "0"
         hour: "18"
         day: "*"
         month: "*"
         weekday: "5"
-        job: "sudo /usr/bin/btrfs scrub start /rclone_data"
+        job: "sudo /usr/bin/btrfs scrub start /NAS"
         state: present
 
-    - name: Download offsite backup script
-      ansible.builtin.get_url:
-        url: "{{ url }}"
-        dest: "{{ url_folder }}"
-        mode: '0774'
+    #- name: Download offsite backup script
+    #  ansible.builtin.get_url:
+    #    url: "{{ url }}"
+    #    dest: "{{ url_folder }}"
+    #    mode: '0774'
 
     - name: Install microk8s
       community.general.snap:
