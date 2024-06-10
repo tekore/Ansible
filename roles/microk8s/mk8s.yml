@@ -17,10 +17,6 @@
           - lm-sensors
           - postfix
           - gparted
-          - libfuse2
-          - libgbm-dev
-          - libasound-dev
-          - gnome-session
           - btrfs-progs
         state: latest
         update_cache: true
