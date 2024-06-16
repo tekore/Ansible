@@ -18,6 +18,7 @@
           - postfix
           - gparted
           - btrfs-progs
+          - cockpit
         state: latest
         update_cache: true
 
@@ -29,8 +30,8 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        owner: tekore
-        group: tekore
+        owner: root
+        group: root
         mode: 0777
       with_items:
         - /var/mk8s-certs
@@ -105,3 +106,9 @@
         - /var/snap/microk8s/current/certs/ca.crt
         - /var/snap/microk8s/current/certs/client.crt
         - /var/snap/microk8s/current/certs/client.key
+
+    - name: Start and enable cockpit
+      ansible.builtin.systemd_service:
+        name: cockpit.socket
+        state: started
+        enabled: true
