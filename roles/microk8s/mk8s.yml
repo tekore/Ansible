@@ -39,8 +39,6 @@
         - /var/containers/pigallery2/config
         - /var/containers/pigallery2/db
         - /var/containers/pigallery2/tmp
-        - /var/containers/jellyfin/config
-        - /var/containers/jellyfin/cache
         - /NAS
 
     - name: Enable btrfs scrub cronjob
@@ -64,12 +62,6 @@
         weekday: "5"
         job: "sudo /usr/bin/btrfs subvolume snapshot /NAS /NAS/$(date +%F-%T)"
         state: present
-
-    #- name: Download offsite backup script
-    #  ansible.builtin.get_url:
-    #    url: "{{ url }}"
-    #    dest: "{{ url_folder }}"
-    #    mode: '0774'
 
     - name: Install microk8s
       community.general.snap:
