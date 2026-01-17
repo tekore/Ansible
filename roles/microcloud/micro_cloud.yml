@@ -1,5 +1,5 @@
 ---
-- name: Configure Server
+- name: Configure MicroCloud
   connection: local
   become: true
   become_user: root
@@ -8,12 +8,6 @@
     - name: Set hostname
       ansible.builtin.hostname:
         name: microCloud
-
-    # Install
-    - name: Install microcloud
-      community.general.snap:
-        classic: true
-        name: "microcloud"
 
     - name: Create the needed directories
       ansible.builtin.file:
@@ -24,9 +18,14 @@
         mode: 0777
       with_items:
         - /Storage
-#########################################################################################
-    - name: Adding user to group (if needed by the microcloud install docs)
-      user:
-        name: tekore
-        groups: microk8s
-        append: yes
+
+    - name: Install {{ item }} snap with cohort
+      community.general.snap:
+        name: "{{ item }}"
+        options:
+          - --cohort="+"
+      loop:
+        - lxd
+        - microceph
+        - microovn
+        - microcloud
