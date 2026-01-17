@@ -22,8 +22,6 @@
     - name: Install {{ item }} snap with cohort
       community.general.snap:
         name: "{{ item }}"
-        options:
-          - --cohort="+"
       loop:
         - lxd
         - microceph
