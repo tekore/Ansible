@@ -33,6 +33,8 @@
         content: |
           lookup_subnet: 145.239.66.0/24
           lookup_interface: eno1
+          initiator: microCloud
+          session_passphrase: Password123*test
           systems:
             - name: microCloud
               ovn_uplink_interface: eno1
@@ -40,20 +42,10 @@
                 local:
                   path: /Storage
                   wipe: false
-          networks:
-            - name: lxdfan0
-              type: bridge
-              config:
-                bridge.mode: fan
-                fan.underlay_subnet: 145.239.66.0/24
-                ipv4.nat: "true"
           ovn:
             ipv4_gateway: auto
             ipv4_range: auto
             ipv6_gateway: auto
-          ceph:
-            internal_network: ""
-            public_network: ""
         dest: /tmp/preseed.yaml
 
     - name: Initialize MicroCloud with preseed
