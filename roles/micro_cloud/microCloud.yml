@@ -38,10 +38,6 @@
           systems:
             - name: microCloud
               ovn_uplink_interface: eno1
-              storage:
-                local:
-                  path: /Storage
-                  wipe: false
           ovn:
             ipv4_gateway: 192.168.1.1/24
             ipv4_range: 192.168.1.100-192.168.1.254
@@ -51,3 +47,14 @@
       shell: cat /tmp/preseed.yaml | microcloud preseed
       args:
         executable: /bin/bash
+    
+    - name: Create custom storage pool at /Storage
+      shell: lxc storage create storage-pool dir source=/Storage
+      args:
+        executable: /bin/bash
+
+    - name: Set as default storage pool (optional)
+      shell: lxc profile device add default root disk path=/ pool=storage-pool
+      args:
+        executable: /bin/bash
+      ignore_errors: yes
