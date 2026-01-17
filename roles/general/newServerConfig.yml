@@ -23,7 +23,7 @@
         group: root
         validate: 'visudo -cf %s'
 
-    - name: Copy ubuntu user authoerized_keys file
+    - name: Copy ubuntu user authorized_keys file
       ansible.builtin.copy:
         src: /home/ubuntu/.ssh/authorized_keys
         dest: /home/tekore/.ssh/authorized_keys

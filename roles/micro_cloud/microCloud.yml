@@ -29,3 +29,14 @@
         - microceph
         - microovn
         - microcloud
+    
+    - name: Deploy MicroCloud with configuration preseed
+      copy:
+        content: |
+          {{ lookup('file', 'preseed.yaml') }}
+        dest: /tmp/preseed.yaml
+
+    - name: Initialize MicroCloud with preseed
+      shell: cat /tmp/preseed.yaml | microcloud preseed
+      args:
+        executable: /bin/bash
