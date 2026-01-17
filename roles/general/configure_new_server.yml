@@ -14,26 +14,11 @@
 
     - name: Copy ubuntu user files to tekore home
       ansible.builtin.copy:
-        src: /home/ubuntu/{{ item }}
-        dest: /home/tekore/{{ item }}
+        src: /home/ubuntu/.ssh/authorized_keys
+        dest: /home/tekore/.ssh/authorized_keys
         owner: tekore
         group: tekore
         remote_src: yes
-      loop:
-        - .bashrc
-        - .profile
-        - .ssh
-
-    - name: Set correct permissions on .ssh directory and files
-      ansible.builtin.file:
-        path: /home/tekore/.ssh/{{ item.path }}
-        state: "{{ item.state | default(omit) }}"
-        owner: tekore
-        group: tekore
-        mode: "{{ item.mode }}"
-      loop:
-        - { path: '', state: 'directory', mode: '0700' }
-        - { path: 'authorized_keys', mode: '0600' }
 
     - name: Delete ubuntu user and home directory
       ansible.builtin.user:
