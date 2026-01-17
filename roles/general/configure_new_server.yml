@@ -12,7 +12,18 @@
         shell: /bin/bash
         create_home: yes
 
-    - name: Copy ubuntu user files to tekore home
+    - name: Create sudoers file for tekore
+      ansible.builtin.copy:
+        content: |
+          # User rules for tekore
+          tekore ALL=(ALL) NOPASSWD:ALL
+        dest: /etc/sudoers.d/91-tekore
+        mode: '0440'
+        owner: root
+        group: root
+        validate: 'visudo -cf %s'
+
+    - name: Copy ubuntu user authoerized_keys file
       ansible.builtin.copy:
         src: /home/ubuntu/.ssh/authorized_keys
         dest: /home/tekore/.ssh/authorized_keys
