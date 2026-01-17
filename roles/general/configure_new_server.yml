@@ -8,7 +8,7 @@
     - name: Create tekore user with specified groups
       ansible.builtin.user:
         name: tekore
-        groups: tekore,adm,sudo,lxd,admin
+        groups: adm,sudo,lxd,admin
         shell: /bin/bash
         create_home: yes
 
