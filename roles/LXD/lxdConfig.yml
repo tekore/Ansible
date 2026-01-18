@@ -34,7 +34,6 @@
         content: |
           config:
             core.https_address: '127.0.0.1:8443'
-            core.trust_password: "Changeme123Test£"
           networks:
           - config:
               ipv4.address: 192.168.1.1/24
@@ -87,3 +86,13 @@
       register: result
       until: result.rc == 0
       ignore_errors: yes
+  
+    - name: Generate LXD UI token
+      shell: lxc config trust add --name ui-access
+      register: lxd_token
+      args:
+        executable: /bin/bash
+
+    - name: Display authentication token
+      ansible.builtin.debug:
+        msg: "LXD UI Token: {{ lxd_token.stdout }}"
