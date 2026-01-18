@@ -69,6 +69,16 @@
       args:
         executable: /bin/bash
 
+    - name: Enable LXD UI
+      shell: snap set lxd ui.enable=true
+      args:
+        executable: /bin/bash
+
+    - name: Restart LXD to apply UI settings
+      shell: snap restart lxd
+      args:
+        executable: /bin/bash
+
     - name: Wait for LXD to be ready
       shell: lxc list
       retries: 5
