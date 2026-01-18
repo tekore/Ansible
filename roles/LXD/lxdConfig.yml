@@ -89,15 +89,18 @@
   
     - name: Setup LXD UI authentication
       shell: |
+        lxc auth identity delete tls/lxd-ui 2>/dev/null || true
+        
         if ! lxc auth group show admins >/dev/null 2>&1; then
           lxc auth group create admins
           lxc auth group permission add admins server admin
         fi
+        
         lxc auth identity create tls/lxd-ui --group admins
-      register: lxd_ui_token
+      register: lxd_ui_setup
       args:
         executable: /bin/bash
 
-    - name: Display LXD UI authentication token
+    - name: Display complete output
       ansible.builtin.debug:
-        msg: "{{ lxd_ui_token.stdout }}"
+        var: lxd_ui_setup.stdout_lines
