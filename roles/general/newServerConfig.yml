@@ -22,6 +22,14 @@
         owner: root
         group: root
         validate: 'visudo -cf %s'
+  
+    - name: Create the needed directories
+      ansible.builtin.file:
+        path: "/home/tekore/.ssh"
+        state: directory
+        owner: tekore
+        group: tekore
+        mode: 0760
 
     - name: Copy ubuntu user authorized_keys file
       ansible.builtin.copy:
