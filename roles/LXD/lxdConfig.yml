@@ -19,25 +19,10 @@
       with_items:
         - /Storage
 
-    - name: Set iptables to use nft backend
-      community.general.alternatives:
-        name: iptables
-        path: /usr/sbin/iptables-nft
-
-    - name: Set ip6tables to use nft backend
-      community.general.alternatives:
-        name: ip6tables
-        path: /usr/sbin/ip6tables-nft
-
     - name: Install LXD snap
       community.general.snap:
         name: lxd
         channel: latest/stable
-
-    #- name: Get IPv4 address from eno1
-    #  ansible.builtin.shell: ip -4 addr show eno1 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'
-    #  register: eno1_ip
-    #  changed_when: false
 
     - name: Create LXD preseed configuration
       copy:
