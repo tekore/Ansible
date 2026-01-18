@@ -87,12 +87,17 @@
       until: result.rc == 0
       ignore_errors: yes
   
-    - name: Generate LXD UI token
-      shell: lxc config trust add --name ui-access
-      register: lxd_token
+    - name: Setup LXD UI authentication
+      shell: |
+        if ! lxc auth group show admins >/dev/null 2>&1; then
+          lxc auth group create admins
+          lxc auth group permission add admins server admin
+        fi
+        lxc auth identity create tls/lxd-ui --group admins
+      register: lxd_ui_token
       args:
         executable: /bin/bash
 
-    - name: Display authentication token
+    - name: Display LXD UI authentication token
       ansible.builtin.debug:
-        msg: "LXD UI Token: {{ lxd_token.stdout }}"
+        msg: "{{ lxd_ui_token.stdout }}"
