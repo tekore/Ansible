@@ -19,6 +19,16 @@
       with_items:
         - /Storage
 
+    - name: Set iptables to use nft backend
+      community.general.alternatives:
+        name: iptables
+        path: /usr/sbin/iptables-nft
+
+    - name: Set ip6tables to use nft backend
+      community.general.alternatives:
+        name: ip6tables
+        path: /usr/sbin/ip6tables-nft
+
     - name: Install LXD snap
       community.general.snap:
         name: lxd
