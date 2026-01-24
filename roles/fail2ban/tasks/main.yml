@@ -42,6 +42,6 @@
     state: started
     enabled: yes
 
-- name: Reboot to ensure SSH takes the new port
-  ansible.builtin.reboot:
-    msg: "Server will reboot now!"
+#- name: Reboot to ensure SSH takes the new port
+#  ansible.builtin.reboot:
+#    msg: "Server will reboot now!"
