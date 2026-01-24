@@ -25,7 +25,7 @@ $ ansible-pull -U https://github.com/tekore/Ansible.git roles/microk8s/mk8s.yml
 
 #### Web interface access of services set up by these playbooks can be achieved via SSH tunnels like below
 ```sh
-ssh -L 8443:localhost:8443 tekore@<SERVER_IP> -p 2022
+ssh -L 8443:localhost:8443 <USER>@<SERVER_IP> -p <SSH_PORT>
 ```
 
 ## Maintainers
