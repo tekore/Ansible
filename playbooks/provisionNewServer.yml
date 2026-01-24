@@ -5,6 +5,6 @@
   gather_facts: yes
   become: yes
   roles:
-    - general
+    - newUser
     - fail2ban
-    - LXD
+    - lxdInstall
