@@ -23,9 +23,9 @@
     state: present
     key: "{{ ssh_public_key }}"
 
-#- name: Delete ubuntu user and home directory
-#  ansible.builtin.user:
-#    name: ubuntu
-#    state: absent
-#    remove: yes
-#  ignore_errors: yes
+- name: Delete ubuntu user and home directory
+  ansible.builtin.user:
+    name: ubuntu
+    state: absent
+    remove: yes
+  ignore_errors: yes

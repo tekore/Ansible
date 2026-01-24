@@ -23,6 +23,13 @@
     line: 'Port {{ ports.ssh }}'
     validate: 'sshd -t -f %s'
 
+- name: Stop and disable ssh.socket if it exists
+  ansible.builtin.service:
+    name: ssh.socket
+    state: stopped
+    enabled: false
+  ignore_errors: true
+
 - name: Restart the SSH service to apply changes
   ansible.builtin.service:
     name: ssh
