@@ -1,0 +1,47 @@
+---
+- name: Update all packages
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: dist
+
+- name: Install packages
+  apt:
+    pkg:
+      - ufw
+      - fail2ban
+    state: latest
+    update_cache: true
+
+- name: Check UFW is disabled
+  ufw:
+    state: disabled
+
+- name: Ensure new SSH port is configured in sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?Port\s+22'
+    line: 'Port {{ ports.ssh }}'
+    validate: 'sshd -t -f %s'
+
+- name: Restart the SSH service to apply changes
+  ansible.builtin.service:
+    name: ssh
+    state: restarted
+
+- name: Copy fail2ban config and set permissions
+  ansible.builtin.copy:
+    src: "{{ files.fail2ban_config }}"
+    dest: "{{ files.fail2ban_config_destination }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable and start Fail2Ban
+  ansible.builtin.systemd:
+    name: fail2ban.service
+    state: started
+    enabled: yes
+
+- name: Reboot to ensure SSH takes the new port
+  ansible.builtin.reboot:
+    msg: "Server will reboot now!"

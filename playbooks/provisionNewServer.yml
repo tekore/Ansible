@@ -1,0 +1,10 @@
+---
+- name: Configure New Server via Ansible Pull
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  become: yes
+  roles:
+    - general
+    - fail2ban
+    - LXD

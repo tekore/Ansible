@@ -1,0 +1,100 @@
+---
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ server_hostname }}"
+
+- name: Install packages
+  apt:
+    pkg:
+      - ufw
+      - vim
+      - lm-sensors
+      - postfix
+      - gparted
+      - btrfs-progs
+      - cockpit
+    state: latest
+    update_cache: true
+
+- name: Check UFW is disabled
+  ufw:
+    state: disabled
+
+- name: Create the needed directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0777
+  with_items:
+    - /var/mk8s-certs
+    - /var/rclone-conf
+    - /var/containers/pigallery2/config
+    - /var/containers/pigallery2/db
+    - /var/containers/pigallery2/tmp
+    - /NAS
+
+- name: Enable btrfs scrub cronjob
+  ansible.builtin.cron:
+    name: Scrub backup /NAS
+    minute: "0"
+    hour: "18"
+    day: "*"
+    month: "*"
+    weekday: "5"
+    job: "sudo /usr/bin/btrfs scrub start /NAS"
+    state: present
+
+- name: Enable btrfs snapshot cronjob
+  ansible.builtin.cron:
+    name: Snapshot /NAS
+    minute: "0"
+    hour: "19"
+    day: "*"
+    month: "*"
+    weekday: "5"
+    job: "sudo /usr/bin/btrfs subvolume snapshot /NAS /NAS/$(date +%F-%T)"
+    state: present
+
+- name: Install microk8s
+  community.general.snap:
+    classic: true
+    name: "microk8s"
+
+- name: Adding user to group
+  user:
+    name: tekore
+    groups: microk8s
+    append: yes
+
+- name: Change kube folder ownership
+  file:
+    path: /home/tekore/.kube
+    owner: tekore
+    group: tekore
+    state: directory
+
+- name: Disable unused microk8s modules
+  command: microk8s disable ha-cluster --force
+
+- name: Enable microk8s common modules
+  command: microk8s enable dns cert-manager ingress hostpath-storage metrics-server
+
+- name: Copy cert files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /var/mk8s-certs/
+    owner: root
+    group: root
+    mode: '0777'
+  with_items:
+    - /var/snap/microk8s/current/certs/ca.crt
+    - /var/snap/microk8s/current/certs/client.crt
+    - /var/snap/microk8s/current/certs/client.key
+
+- name: Start and enable cockpit
+  ansible.builtin.systemd_service:
+    name: cockpit.socket
+    state: started
+    enabled: true

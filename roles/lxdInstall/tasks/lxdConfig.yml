@@ -1,0 +1,65 @@
+---
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ server_hostname }}"
+
+- name: Create the needed directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - "{{ storage_directory }}"
+
+- name: Install LXD snap
+  community.general.snap:
+    name: lxd
+    channel: latest/stable
+
+- name: Create LXD preseed configuration
+  copy:
+    content: "{{ lxd_preseed | to_nice_yaml }}"
+    dest: /tmp/lxd-preseed.yaml
+
+- name: Initialize LXD with preseed
+  shell: cat /tmp/lxd-preseed.yaml | lxd init --preseed
+  args:
+    executable: /bin/bash
+
+- name: Enable LXD UI
+  shell: snap set lxd ui.enable=true
+  args:
+    executable: /bin/bash
+
+- name: Restart LXD to apply UI settings
+  shell: snap restart lxd
+  args:
+    executable: /bin/bash
+
+- name: Wait for LXD to be ready
+  shell: lxc list
+  retries: 5
+  delay: 2
+  register: result
+  until: result.rc == 0
+  ignore_errors: yes
+
+- name: Setup LXD UI authentication
+  shell: |
+    lxc auth identity delete tls/lxd-ui 2>/dev/null || true
+    
+    if ! lxc auth group show admins >/dev/null 2>&1; then
+      lxc auth group create admins
+      lxc auth group permission add admins server admin
+    fi
+    
+    lxc auth identity create tls/lxd-ui --group admins
+  register: lxd_ui_setup
+  args:
+    executable: /bin/bash
+
+- name: Display complete output
+  ansible.builtin.debug:
+    var: lxd_ui_setup.stdout_lines
