@@ -1,6 +1,6 @@
 ---
 - name: Configure New Server via Ansible Pull
-  hosts: all
+  hosts: localhost
   connection: local
   gather_facts: yes
   become: yes
