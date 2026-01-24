@@ -3,4 +3,4 @@ files:
   fail2ban_config_destination: /etc/fail2ban/jail.d/defaults-ubuntu.conf
 
 ports:
-  ssh: 22
+  ssh: 2022

@@ -26,7 +26,7 @@
 - name: Restart the SSH service to apply changes
   ansible.builtin.service:
     name: ssh
-    state: restarted
+    state: reloaded
 
 - name: Copy fail2ban config and set permissions
   ansible.builtin.copy:
@@ -41,7 +41,3 @@
     name: fail2ban.service
     state: started
     enabled: yes
-
-#- name: Reboot to ensure SSH takes the new port
-#  ansible.builtin.reboot:
-#    msg: "Server will reboot now!"
