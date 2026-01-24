@@ -11,16 +11,16 @@ Variable Ansible playbooks I use for Automation
 ## Usage
 - Clone the repo:
 ```sh
-$ git clone https://github.com/tekore/Ansible
+git clone https://github.com/tekore/Ansible
 ```
 
 - Run a playbook in push mode:
 ```sh
-$ ansible-playbook <PLAYBOOK>.yml
+ansible-playbook <PLAYBOOK>.yml
 ```
 - Run a playbook in pull mode:
 ```sh
-$ ansible-pull -U https://github.com/tekore/Ansible.git roles/microk8s/mk8s.yml
+ansible-pull -U https://github.com/tekore/Ansible.git -i localhost, playbooks/provisionNewServer.yml
 ```
 
 #### Web interface access of services set up by these playbooks can be achieved via SSH tunnels like below
