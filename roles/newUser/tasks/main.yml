@@ -17,22 +17,11 @@
     group: root
     validate: 'visudo -cf %s'
 
-- name: Create the needed directories
-  ansible.builtin.file:
-    path: "/home/{{ username }}/.ssh"
-    state: directory
-    owner: "{{ username }}"
-    group: "{{ username }}"
-    mode: '0700'
-
 - name: Add SSH public key to authorized_keys
-  ansible.builtin.copy:
-    content: |
-      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMAJedM/efW2BJhIsEOhoD350rqWXUoocusEiXCEiYKd
-    dest: "/home/{{ username }}/.ssh/authorized_keys"
-    owner: "{{ username }}"
-    group: "{{ username }}"
-    mode: '0600'
+  ansible.posix.authorized_key:
+    user: "{{ username }}"
+    state: present
+    key: "{{ ssh_public_key }}"
 
 - name: Delete ubuntu user and home directory
   ansible.builtin.user:
