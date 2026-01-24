@@ -2,7 +2,7 @@
 - name: Create "{{ username }}" user with specified groups
   ansible.builtin.user:
     name: "{{ username }}"
-    groups: adm,sudo,lxd,admin
+    groups: adm,sudo,lxd
     shell: /bin/bash
     create_home: yes
 
