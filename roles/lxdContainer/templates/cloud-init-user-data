@@ -28,6 +28,5 @@ users:
 runcmd:
   - sleep 10
   - apt-get update
-  - apt-get upgrade -y
   - apt-get install -y ansible openssh-server
   - ansible-pull -U {{ ansible_repo_url }} -i localhost --purge {{ ansible_repo_playbook }} --extra-vars "@/tmp/runner_secrets.yml"

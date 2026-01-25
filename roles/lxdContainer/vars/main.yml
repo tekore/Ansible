@@ -1,12 +1,10 @@
 ---
 container_name: "ActionsRunner"
-ubuntu_version: "22.04"
+ubuntu_version: "24.04"
 container_memory: "2GB"
 
 runner_user: "runner"
 runner_password: "ChangeMe123!"
-
-ssh_key_path: "/root/.ssh/id_rsa.pub"
 
 github_pat: "github_pat_11EXAMPLE_TOKEN_HERE"
 github_repo_url: "https://github.com/yourusername/yourrepo"
@@ -14,5 +12,3 @@ github_runner_name: "LXD-Runner"
 
 ansible_repo_url: "https://github.com/tekore/Ansible.git"
 ansible_repo_playbook: "playbooks/configure.yml"
-
-debug_mode: false

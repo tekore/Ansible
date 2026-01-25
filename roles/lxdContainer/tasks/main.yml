@@ -15,11 +15,6 @@
     mode: '0644'
   register: cloud_init_file
 
-- name: Show cloud-init config
-  debug:
-    var: cloud_init_content.stdout_lines
-  when: debug_mode | default(false)
-
 - name: Launch LXD container
   command: >
     lxc launch ubuntu:{{ ubuntu_version }} {{ container_name }}
