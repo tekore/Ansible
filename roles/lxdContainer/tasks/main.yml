@@ -1,19 +1,7 @@
 ---
 - name: Check if LXD is installed (Fails if Lxd isn't)
   command: lxd version
-
-- name: Create temporary directory for cloud-init
-  tempfile:
-    state: directory
-    suffix: cloudinit
-  register: cloudinit_temp_dir
-
-- name: Generate cloud-init configuration from template
-  template:
-    src: cloud-init-user-data
-    dest: "{{ cloudinit_temp_dir.path }}/user-data.yml"
-    mode: '0644'
-  register: cloud_init_file
+  changed_when: false
 
 - name: Launch LXD container
   command: >
@@ -25,39 +13,81 @@
 
 - name: Wait for container to be ready
   pause:
-    seconds: 30
+    seconds: 10
 
-- name: Wait for cloud-init status
+- name: Wait for container networking
   command: lxc exec {{ container_name }} -- cloud-init status --wait
   register: cloud_init_wait
   failed_when: false
   changed_when: false
 
-- name: Apply cloud-init configuration
+- name: Update apt cache
+  command: lxc exec {{ container_name }} -- apt-get update
+  changed_when: true
+
+- name: Install required packages
+  command: lxc exec {{ container_name }} -- apt-get install -y ansible openssh-server
+  changed_when: true
+
+- name: Create runner user
+  command: lxc exec {{ container_name }} -- useradd -m -s /bin/bash -G sudo {{ runner_user }}
+  register: create_user
+  failed_when: create_user.rc != 0 and 'already exists' not in create_user.stderr
+  changed_when: create_user.rc == 0
+
+- name: Set runner user password
   shell: |
-    cat {{ cloud_init_file.dest }} | lxc exec {{ container_name }} -- tee /var/lib/cloud/seed/nocloud-net/user-data
-  register: apply_config
+    lxc exec {{ container_name }} -- bash -c "echo '{{ runner_user }}:{{ runner_password }}' | chpasswd"
+  changed_when: true
+  no_log: true
+
+- name: Configure passwordless sudo for runner
+  command: |
+    lxc exec {{ container_name }} -- bash -c "echo '{{ runner_user }} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/{{ runner_user }}"
   changed_when: true
 
-- name: Clean cloud-init
-  command: lxc exec {{ container_name }} -- cloud-init clean
+- name: Set sudoers file permissions
+  command: lxc exec {{ container_name }} -- chmod 0440 /etc/sudoers.d/{{ runner_user }}
   changed_when: true
 
-- name: Restart container
-  command: lxc restart {{ container_name }}
+- name: Enable SSH password authentication
+  command: |
+    lxc exec {{ container_name }} -- bash -c "sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config"
   changed_when: true
 
-- name: Wait for container restart
-  pause:
-    seconds: 30
+- name: Enable root SSH login
+  command: |
+    lxc exec {{ container_name }} -- bash -c "sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config"
+  changed_when: true
 
-- name: Wait for cloud-init to complete
-  command: lxc exec {{ container_name }} -- cloud-init status --wait
-  register: cloud_init_complete
-  changed_when: false
+- name: Restart SSH service
+  command: lxc exec {{ container_name }} -- systemctl restart ssh
+  changed_when: true
 
-- name: Cleanup temporary directory
-  file:
-    path: "{{ cloudinit_temp_dir.path }}"
-    state: absent
-  when: cloudinit_temp_dir is defined
+- name: Create runner secrets file
+  shell: |
+    lxc exec {{ container_name }} -- tee /tmp/runner_secrets.yml > /dev/null <<EOF
+    ---
+    # GitHub Runner Secrets
+    github_repo_url: {{ github_repo_url }}
+    github_runner_name: {{ github_runner_name }}
+    github_pat: {{ github_pat }}
+    EOF
+  changed_when: true
+  no_log: true
+
+- name: Run ansible-pull to configure runner
+  command: >
+    lxc exec {{ container_name }} -- 
+    ansible-pull -U {{ ansible_repo_url }} 
+    -i localhost 
+    --purge 
+    {{ ansible_repo_playbook }} 
+    --extra-vars '@/tmp/runner_secrets.yml'
+  register: ansible_pull
+  changed_when: true
+
+- name: Display ansible-pull output
+  debug:
+    var: ansible_pull.stdout_lines
+  when: ansible_pull.stdout_lines is defined
