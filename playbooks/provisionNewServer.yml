@@ -7,4 +7,3 @@
   roles:
     - newUser
     - fail2ban
-    - lxdInstall

@@ -23,6 +23,11 @@ ansible-playbook <PLAYBOOK>.yml
 ansible-pull -U https://github.com/tekore/Ansible.git -i localhost, playbooks/provisionNewServer.yml
 ```
 
+- Run a playbook in pull mode using your own custom variables:
+```sh
+ansible-pull -U https://github.com/tekore/Ansible.git -i localhost, playbooks/provisionNewServer.yml --extra-vars "@path/to/your_vars_file.yml"
+```
+
 #### Web interface access of services set up by these playbooks can be achieved via SSH tunnels like below
 ```sh
 ssh -L 8443:localhost:8443 <USER>@<SERVER_IP> -p <SSH_PORT>
