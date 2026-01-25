@@ -99,8 +99,8 @@
       -v /home/runner/actions-runner:/home/runner/work \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -v /home/runner/entrypoint.sh:/entrypoint.sh \
-      -e RUNNER_NAME="{{ github_runner_name }}" \
-      -e REPO_URL="{{ github_repo_url }}" \
-      -e GITHUB_PAT="{{ github_pat }}" \
+      -e RUNNER_NAME={{ github_runner_name }} \
+      -e REPO_URL={{ github_repo_url }} \
+      -e GITHUB_PAT={{ github_pat }} \
       ghcr.io/actions/actions-runner:latest \
       /entrypoint.sh
