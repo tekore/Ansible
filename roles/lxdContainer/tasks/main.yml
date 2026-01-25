@@ -8,6 +8,9 @@
     lxc launch ubuntu:{{ ubuntu_version }} {{ container_name }}
     --config limits.memory={{ container_memory }}
     --config boot.autostart=true
+    --config security.nesting=true
+    --config security.syscalls.intercept.mknod=true
+    --config security.syscalls.intercept.setxattr=true
   register: lxc_launch
   changed_when: "'Creating' in lxc_launch.stdout"
 
@@ -67,7 +70,6 @@
 - name: Create runner secrets file
   shell: |
     lxc exec {{ container_name }} -- tee /tmp/runner_secrets.yml > /dev/null <<EOF
-    ---
     # GitHub Runner Secrets
     github_repo_url: {{ github_repo_url }}
     github_runner_name: {{ github_runner_name }}
