@@ -1,9 +1,9 @@
 ---
-- name: Configure LXD and an Actions Runner via Ansible Pull
+- name: Configure LXD and a configurable container via Ansible Pull
   hosts: localhost
   connection: local
   gather_facts: yes
   become: yes
   roles:
     - lxdInstall
-    - lxdGithubRunner
+    - lxdContainer

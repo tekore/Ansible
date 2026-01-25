@@ -1,19 +1,6 @@
 ---
-- name: Check if LXD is installed
+- name: Check if LXD is installed (Fails if Lxd isn't)
   command: lxd version
-  register: lxd_check
-  failed_when: false
-  changed_when: false
-
-- name: Fail if LXD is not installed
-  fail:
-    msg: "LXD not found. Please install LXD first."
-  when: lxd_check.rc != 0
-
-- name: Generate random container name
-  set_fact:
-    container_name: "github-runner-{{ 999999 | random }}"
-  when: container_name is not defined
 
 - name: Create temporary directory for cloud-init
   tempfile:
@@ -28,12 +15,6 @@
     mode: '0644'
   register: cloud_init_file
 
-- name: Display cloud-init configuration (debug)
-  command: cat {{ cloud_init_file.dest }}
-  register: cloud_init_content
-  changed_when: false
-  when: debug_mode | default(false)
-
 - name: Show cloud-init config
   debug:
     var: cloud_init_content.stdout_lines
@@ -47,9 +28,9 @@
   register: lxc_launch
   changed_when: "'Creating' in lxc_launch.stdout"
 
-- name: Wait for container to be ready (initial)
+- name: Wait for container to be ready
   pause:
-    seconds: 10
+    seconds: 30
 
 - name: Wait for cloud-init status
   command: lxc exec {{ container_name }} -- cloud-init status --wait
@@ -73,65 +54,12 @@
 
 - name: Wait for container restart
   pause:
-    seconds: 15
+    seconds: 30
 
 - name: Wait for cloud-init to complete
   command: lxc exec {{ container_name }} -- cloud-init status --wait
   register: cloud_init_complete
   changed_when: false
-
-- name: Check if SSH key exists
-  stat:
-    path: "{{ ssh_key_path }}"
-  register: ssh_key_file
-  delegate_to: localhost
-
-- name: Add SSH key to container
-  when: ssh_key_file.stat.exists
-  block:
-    - name: Read SSH public key
-      slurp:
-        src: "{{ ssh_key_path }}"
-      register: ssh_key_content
-      delegate_to: localhost
-
-    - name: Create .ssh directory
-      command: lxc exec {{ container_name }} -- sudo -u {{ runner_user }} mkdir -p /home/{{ runner_user }}/.ssh
-      changed_when: true
-
-    - name: Add SSH authorized key
-      shell: |
-        lxc exec {{ container_name }} -- sudo -u {{ runner_user }} sh -c "echo '{{ ssh_key_content.content | b64decode | trim }}' >> /home/{{ runner_user }}/.ssh/authorized_keys"
-      changed_when: true
-
-    - name: Set .ssh directory permissions
-      command: lxc exec {{ container_name }} -- sudo -u {{ runner_user }} chmod 700 /home/{{ runner_user }}/.ssh
-      changed_when: true
-
-    - name: Set authorized_keys permissions
-      command: lxc exec {{ container_name }} -- sudo -u {{ runner_user }} chmod 600 /home/{{ runner_user }}/.ssh/authorized_keys
-      changed_when: true
-
-- name: Wait for container network
-  pause:
-    seconds: 5
-
-- name: Get container IP address
-  command: lxc list {{ container_name }} -c 4 --format csv
-  register: container_ip_raw
-  changed_when: false
-
-- name: Parse container IP
-  set_fact:
-    container_ip: "{{ container_ip_raw.stdout.split(' ')[0] }}"
-
-- name: Display container information
-  debug:
-    msg:
-      - "✅ Container {{ container_name }} created and configured"
-      - "Container IP: {{ container_ip }}"
-      - "Username: {{ runner_user }}"
-      - "Password: {{ runner_password }}"
 
 - name: Cleanup temporary directory
   file:

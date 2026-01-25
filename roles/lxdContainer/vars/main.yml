@@ -1,4 +1,5 @@
 ---
+container_name: "ActionsRunner"
 ubuntu_version: "22.04"
 container_memory: "2GB"
 
@@ -12,6 +13,6 @@ github_repo_url: "https://github.com/yourusername/yourrepo"
 github_runner_name: "LXD-Runner"
 
 ansible_repo_url: "https://github.com/tekore/Ansible.git"
-ansible_repo_playbook: "playbooks/configureLxd.yml"
+ansible_repo_playbook: "playbooks/configure.yml"
 
 debug_mode: false

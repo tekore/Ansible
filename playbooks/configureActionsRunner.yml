@@ -1,0 +1,8 @@
+---
+- name: Configure a Github Actions Runner via Ansible Pull
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  become: yes
+  roles:
+    - GithubActionsRunner
