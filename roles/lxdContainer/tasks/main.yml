@@ -69,7 +69,7 @@
 
 - name: Create runner secrets file
   shell: |
-    lxc exec {{ container_name }} -- tee /tmp/runner_secrets.yml > /dev/null <<EOF
+    lxc exec {{ container_name }} -- tee /var/runner_secrets.yml > /dev/null <<EOF
     # GitHub Runner Secrets
     github_repo_url: {{ github_repo_url }}
     github_runner_name: {{ github_runner_name }}
@@ -85,7 +85,7 @@
     -i localhost 
     --purge 
     {{ ansible_repo_playbook }} 
-    --extra-vars '@/tmp/runner_secrets.yml'
+    --extra-vars '@/var/runner_secrets.yml'
   register: ansible_pull
   changed_when: true
 

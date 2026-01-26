@@ -51,6 +51,14 @@
     group: "runner"
     mode: '0755'
 
+####################################################################
+# Need to fix the below, it doesn't replace the current runner if I reboot the container
+# Probably as it's a container and it gets wiped...
+# I should use a virtual machine for the lxdContainer role.. so I will need to change that..
+# Then I can keep the github_pat token across reboots of the virtual machine
+
+## The above might not be true as lxc has persistant storage..
+# The issue might be that I'm putting the file in "/tmp"
 - name: Create entrypoint script
   become: true
   become_user: runner
@@ -63,6 +71,8 @@
       echo "=== Cleaning up existing runner configurations and work directories ==="
       rm -rf /home/runner/_work
       find /home/runner -name ".runner" -type f -delete
+      find /home/runner -name ".credentials" -type f -delete
+      find /home/runner -name ".credentials_rsaparams" -type f -delete
       find /home/runner -name ".credentials" -type d -exec rm -rf {} +
       find /home/runner -name ".credentials_rsaparams" -type f -delete
 
@@ -88,6 +98,7 @@
       echo "=== Starting the runner ==="
       ./run.sh
     mode: '0755'
+####################################################################
 
 - name: Run GitHub runner docker container
   become: true
