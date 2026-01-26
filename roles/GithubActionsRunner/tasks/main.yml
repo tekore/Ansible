@@ -51,14 +51,6 @@
     group: "runner"
     mode: '0755'
 
-####################################################################
-# Need to fix the below, it doesn't replace the current runner if I reboot the container
-# Probably as it's a container and it gets wiped...
-# I should use a virtual machine for the lxdContainer role.. so I will need to change that..
-# Then I can keep the github_pat token across reboots of the virtual machine
-
-## The above might not be true as lxc has persistant storage..
-# The issue might be that I'm putting the file in "/tmp"
 - name: Create entrypoint script
   become: true
   become_user: runner
@@ -98,7 +90,6 @@
       echo "=== Starting the runner ==="
       ./run.sh
     mode: '0755'
-####################################################################
 
 - name: Run GitHub runner docker container
   become: true
@@ -107,11 +98,11 @@
     docker run -d \
       --name github-runner \
       --restart always \
+      --entrypoint /entrypoint.sh \
       -v /home/runner/actions-runner:/home/runner/work \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -v /home/runner/entrypoint.sh:/entrypoint.sh \
       -e RUNNER_NAME={{ github_runner_name }} \
       -e REPO_URL={{ github_repo_url }} \
       -e GITHUB_PAT={{ github_pat }} \
-      ghcr.io/actions/actions-runner:latest \
-      /entrypoint.sh
+      ghcr.io/actions/actions-runner:latest
