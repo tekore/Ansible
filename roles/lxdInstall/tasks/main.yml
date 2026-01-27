@@ -18,33 +18,50 @@
     name: lxd
     channel: latest/stable
 
+- name: Check if LXD is already initialized
+  shell: lxc storage list --format=json
+  register: lxd_initialized
+  failed_when: false
+  changed_when: false
+
 - name: Create LXD preseed configuration
   copy:
     content: "{{ lxd_preseed | to_nice_yaml }}"
     dest: /tmp/lxd-preseed.yaml
+  when: lxd_initialized.rc != 0
 
 - name: Initialize LXD with preseed
   shell: cat /tmp/lxd-preseed.yaml | lxd init --preseed
   args:
     executable: /bin/bash
+  when: lxd_initialized.rc != 0
 
 - name: Enable LXD UI
   shell: snap set lxd ui.enable=true
   args:
     executable: /bin/bash
+  register: ui_enable
+  changed_when: ui_enable.rc == 0
+
+- name: Check if LXD UI setting changed
+  shell: snap get lxd ui.enable
+  register: ui_status
+  changed_when: false
 
 - name: Restart LXD to apply UI settings
   shell: snap restart lxd
   args:
     executable: /bin/bash
+  when: ui_enable.changed
+  register: lxd_restart
 
 - name: Wait for LXD to be ready
   shell: lxc list
-  retries: 5
-  delay: 2
+  retries: 10
+  delay: 3
   register: result
   until: result.rc == 0
-  ignore_errors: yes
+  when: lxd_restart.changed | default(false)
 
 - name: Setup LXD UI authentication
   shell: |
@@ -59,6 +76,7 @@
   register: lxd_ui_setup
   args:
     executable: /bin/bash
+  changed_when: "'Created TLS identity' in lxd_ui_setup.stdout or 'Created group' in lxd_ui_setup.stdout"
 
 - name: Display complete output
   ansible.builtin.debug:

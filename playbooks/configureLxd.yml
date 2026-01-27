@@ -5,5 +5,5 @@
   gather_facts: yes
   become: yes
   roles:
-    #- lxdInstall
+    - lxdInstall
     - lxdActionsRunner

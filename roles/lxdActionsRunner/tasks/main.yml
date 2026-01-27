@@ -83,7 +83,3 @@
 - name: Start runner service
   command: lxc exec {{ container_name }} -- bash -c "cd /home/{{ runner_user }}/actions-runner && ./svc.sh start"
   changed_when: true
-
-- name: Enable service to start on boot
-  command: lxc exec {{ container_name }} -- systemctl enable actions.runner.*
-  changed_when: true
