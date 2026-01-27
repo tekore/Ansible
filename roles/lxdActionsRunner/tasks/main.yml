@@ -3,6 +3,21 @@
   command: lxd version
   changed_when: false
 
+- name: Check if container already exists
+  shell: lxc list --format=json | jq -r '.[].name' | grep -x "{{ container_name }}"
+  register: container_exists
+  failed_when: false
+  changed_when: false
+
+- name: Display message if container exists
+  debug:
+    msg: "Container '{{ container_name }}' already exists. Skipping creation and configuration."
+  when: container_exists.rc == 0
+
+- name: End play if container exists
+  meta: end_host
+  when: container_exists.rc == 0
+
 - name: Launch LXD container
   command: >
     lxc launch ubuntu:{{ ubuntu_version }} {{ container_name }}

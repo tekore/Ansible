@@ -76,8 +76,11 @@
   register: lxd_ui_setup
   args:
     executable: /bin/bash
+  register: ui_setup
   changed_when: "'Created TLS identity' in lxd_ui_setup.stdout or 'Created group' in lxd_ui_setup.stdout"
+  when: lxd_initialized.rc != 0
 
 - name: Display complete output
   ansible.builtin.debug:
     var: lxd_ui_setup.stdout_lines
+  when: ui_setup.changed
