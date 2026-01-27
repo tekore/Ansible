@@ -1,0 +1,89 @@
+---
+- name: Check if LXD is installed
+  command: lxd version
+  changed_when: false
+
+- name: Launch LXD container
+  command: >
+    lxc launch ubuntu:{{ ubuntu_version }} {{ container_name }}
+    --config limits.memory={{ container_memory }}
+    --config boot.autostart=true
+    --config security.nesting=true
+    --config security.syscalls.intercept.mknod=true
+    --config security.syscalls.intercept.setxattr=true
+  register: lxc_launch
+  changed_when: "'Creating' in lxc_launch.stdout"
+
+- name: Wait for container to be ready
+  pause:
+    seconds: 10
+
+- name: Wait for container networking
+  command: lxc exec {{ container_name }} -- cloud-init status --wait
+  register: cloud_init_wait
+  failed_when: false
+  changed_when: false
+
+- name: Update apt cache
+  command: lxc exec {{ container_name }} -- apt-get update
+  changed_when: true
+
+- name: Install required packages
+  command: lxc exec {{ container_name }} -- apt-get install -y curl jq libicu-dev
+  changed_when: true
+
+- name: Create runner user
+  command: lxc exec {{ container_name }} -- useradd -m -s /bin/bash {{ runner_user }}
+  register: create_user
+  failed_when: create_user.rc != 0 and 'already exists' not in create_user.stderr
+  changed_when: create_user.rc == 0
+
+- name: Set runner user password
+  shell: |
+    lxc exec {{ container_name }} -- bash -c "echo '{{ runner_user }}:{{ runner_password }}' | chpasswd"
+  changed_when: true
+  no_log: true
+
+- name: Create actions-runner directory
+  command: lxc exec {{ container_name }} -- su - {{ runner_user }} -c "mkdir -p ~/actions-runner && cd ~/actions-runner"
+  changed_when: true
+
+- name: Get latest runner version
+  uri:
+    url: https://api.github.com/repos/actions/runner/releases/latest
+    return_content: yes
+  register: latest_release
+
+- name: Download and extract runner
+  shell: |
+    lxc exec {{ container_name }} -- su - {{ runner_user }} -c "cd ~/actions-runner && curl -o actions-runner-linux-x64-{{ latest_release.json.tag_name | replace('v', '') }}.tar.gz -L https://github.com/actions/runner/releases/download/{{ latest_release.json.tag_name }}/actions-runner-linux-x64-{{ latest_release.json.tag_name | replace('v', '') }}.tar.gz && tar xzf actions-runner-linux-x64-{{ latest_release.json.tag_name | replace('v', '') }}.tar.gz"
+  changed_when: true
+
+- name: Get registration token from GitHub
+  uri:
+    url: "{{ github_repo_url | regex_replace('https://github.com/', 'https://api.github.com/repos/') }}/actions/runners/registration-token"
+    method: POST
+    headers:
+      Accept: "application/vnd.github+json"
+      Authorization: "Bearer {{ github_pat }}"
+      X-GitHub-Api-Version: "2022-11-28"
+    return_content: yes
+    status_code: 201
+  register: registration_token
+
+- name: Configure runner
+  shell: |
+    lxc exec {{ container_name }} -- su - {{ runner_user }} -c "cd ~/actions-runner && ./config.sh --url {{ github_repo_url }} --token {{ registration_token.json.token }} --name {{ github_runner_name }} --unattended --replace"
+  changed_when: true
+
+- name: Install runner as a service
+  command: lxc exec {{ container_name }} -- bash -c "cd /home/{{ runner_user }}/actions-runner && ./svc.sh install {{ runner_user }}"
+  changed_when: true
+
+- name: Start runner service
+  command: lxc exec {{ container_name }} -- bash -c "cd /home/{{ runner_user }}/actions-runner && ./svc.sh start"
+  changed_when: true
+
+- name: Enable service to start on boot
+  command: lxc exec {{ container_name }} -- systemctl enable actions.runner.*
+  changed_when: true

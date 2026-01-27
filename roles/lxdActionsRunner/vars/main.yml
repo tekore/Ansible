@@ -1,4 +1,4 @@
-container_name: "ActionsRunner"
+container_name: "lxdActionsRunner"
 ubuntu_version: "24.04"
 container_memory: "2GB"
 
