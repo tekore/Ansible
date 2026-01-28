@@ -1,4 +1,5 @@
 ---
+
 server_hostname: "lxd-host"
 
 storage_directory: "/Storage"

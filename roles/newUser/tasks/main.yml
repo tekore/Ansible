@@ -1,4 +1,5 @@
 ---
+
 - name: Create "{{ username }}" user with specified groups
   ansible.builtin.user:
     name: "{{ username }}"

@@ -1,4 +1,5 @@
 ---
+
 - name: Check if LXD is installed
   command: lxd version
   changed_when: false

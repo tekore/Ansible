@@ -1,28 +1,36 @@
 ---
-- name: Generate random credentials
-  set_fact:
-    bucket_access_key: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=20') }}"
-    bucket_secret_key: "{{ lookup('password', '/dev/null chars=ascii_letters,digits,punctuation length=40') }}"
-    bucket_name: "{{ bucket_name }}"
+
+- name: Check if bucket already exists
+  shell: lxc storage bucket list {{ storage_pool }} --format=json | jq -r '.[].name' | grep -x "{{ bucket_name }}"
+  register: bucket_exists
+  failed_when: false
+  changed_when: false
+
+- name: Display message if bucket exists
+  debug:
+    msg: "Bucket '{{ bucket_name }}' already exists. Skipping creation."
+  when: bucket_exists.rc == 0
 
 - name: Create storage bucket
   command: >
     lxc storage bucket create {{ storage_pool }} {{ bucket_name }}
-  register: bucket_create
-  failed_when: 
-    - bucket_create.rc != 0
-    - "'already exists' not in bucket_create.stderr"
-  changed_when: bucket_create.rc == 0
+  when: bucket_exists.rc != 0
+
+- name: Check if bucket key already exists
+  shell: lxc storage bucket key list {{ storage_pool }} {{ bucket_name }} --format=json | jq -r '.[].name' | grep -x "{{ key_name }}"
+  register: key_exists
+  failed_when: false
+  changed_when: false
+
+- name: Display message if key exists
+  debug:
+    msg: "Bucket key '{{ key_name }}' already exists. Skipping creation."
+  when: key_exists.rc == 0
 
 - name: Create bucket key
   command: >
-    lxc storage bucket key create {{ storage_pool }} {{ bucket_name }} {{ key_name }}
-    --role=admin
-  register: key_create
-  failed_when:
-    - key_create.rc != 0
-    - "'already exists' not in key_create.stderr"
-  changed_when: key_create.rc == 0
+    lxc storage bucket key create {{ storage_pool }} {{ bucket_name }} {{ key_name }} --role=admin
+  when: key_exists.rc != 0
 
 - name: Get bucket credentials
   command: >
@@ -30,11 +38,38 @@
   register: bucket_credentials
   changed_when: false
 
+- name: Parse credentials
+  set_fact:
+    parsed_creds: "{{ bucket_credentials.stdout | from_yaml }}"
+
 - name: Set bucket endpoint
   command: lxc config get core.https_address
   register: lxd_address
   changed_when: false
 
-- name: Display complete output
-  ansible.builtin.debug:
-    var: bucket_credentials.stdout_lines
+- name: Display bucket credentials
+  debug:
+    msg:
+      - "========================================="
+      - "LXD S3 Bucket Credentials"
+      - "========================================="
+      - "Bucket Name: {{ bucket_name | default('terraform-state') }}"
+      - "Access Key: {{ parsed_creds.access_key }}"
+      - "Secret Key: {{ parsed_creds.secret_key }}"
+      - "Endpoint: https://{{ lxd_address.stdout }}"
+      - "Region: local"
+      - "========================================="
+      - "Terraform Backend Config:"
+      - "  backend \"s3\" {"
+      - "    bucket   = \"{{ bucket_name | default('terraform-state') }}\""
+      - "    key      = \"terraform.tfstate\""
+      - "    endpoint = \"https://{{ lxd_address.stdout }}\""
+      - "    region   = \"local\""
+      - "    access_key = \"{{ parsed_creds.access_key }}\""
+      - "    secret_key = \"{{ parsed_creds.secret_key }}\""
+      - "    skip_credentials_validation = true"
+      - "    skip_metadata_api_check = true"
+      - "    skip_region_validation = true"
+      - "    force_path_style = true"
+      - "  }"
+      - "========================================="
