@@ -1,0 +1,40 @@
+---
+- name: Generate random credentials
+  set_fact:
+    bucket_access_key: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=20') }}"
+    bucket_secret_key: "{{ lookup('password', '/dev/null chars=ascii_letters,digits,punctuation length=40') }}"
+    bucket_name: "{{ bucket_name }}"
+
+- name: Create storage bucket
+  command: >
+    lxc storage bucket create {{ storage_pool }} {{ bucket_name }}
+  register: bucket_create
+  failed_when: 
+    - bucket_create.rc != 0
+    - "'already exists' not in bucket_create.stderr"
+  changed_when: bucket_create.rc == 0
+
+- name: Create bucket key
+  command: >
+    lxc storage bucket key create {{ storage_pool }} {{ bucket_name }} {{ key_name }}
+    --role=admin
+  register: key_create
+  failed_when:
+    - key_create.rc != 0
+    - "'already exists' not in key_create.stderr"
+  changed_when: key_create.rc == 0
+
+- name: Get bucket credentials
+  command: >
+    lxc storage bucket key show {{ storage_pool }} {{ bucket_name }} {{ key_name }}
+  register: bucket_credentials
+  changed_when: false
+
+- name: Set bucket endpoint
+  command: lxc config get core.https_address
+  register: lxd_address
+  changed_when: false
+
+- name: Display complete output
+  ansible.builtin.debug:
+    var: bucket_credentials.stdout_lines
