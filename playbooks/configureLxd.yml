@@ -6,5 +6,5 @@
   become: yes
   roles:
     - lxdInstall
-    - lxdActionsRunner
     - lxdBucket
+    - lxdActionsRunner
