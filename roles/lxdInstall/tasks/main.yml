@@ -19,6 +19,10 @@
     name: lxd
     channel: latest/stable
 
+- name: Install MinIO snap
+  community.general.snap:
+    name: minio
+
 - name: Check if LXD is already initialized
   shell: lxc storage list --format=json
   register: lxd_initialized
