@@ -22,6 +22,7 @@
 - name: Install MinIO snap
   community.general.snap:
     name: minio
+    channel: edge
 
 - name: Check if LXD is already initialized
   shell: lxc storage list --format=json
