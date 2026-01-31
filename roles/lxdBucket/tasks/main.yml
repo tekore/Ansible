@@ -14,6 +14,7 @@
 - name: Create storage bucket
   command: >
     lxc storage bucket create {{ storage_pool }} {{ bucket_name }}
+  register: bucket_create
   when: bucket_exists.rc != 0
 
 - name: Check if bucket key already exists
@@ -30,6 +31,7 @@
 - name: Create bucket key
   command: >
     lxc storage bucket key create {{ storage_pool }} {{ bucket_name }} {{ key_name }} --role=admin
+  register: key_create
   when: key_exists.rc != 0
 
 - name: Get bucket credentials
@@ -47,7 +49,12 @@
   register: lxd_address
   changed_when: false
 
-- name: Display bucket credentials
+- name: Display bucket creation output
   ansible.builtin.debug:
     var: bucket_create.stdout_lines
-  when: bucket_create.changed
+  when: bucket_create is changed
+
+- name: Display key creation output
+  ansible.builtin.debug:
+    var: key_create.stdout_lines
+  when: key_create is changed
