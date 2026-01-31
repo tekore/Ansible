@@ -19,11 +19,6 @@
     name: lxd
     channel: latest/stable
 
-- name: Install MinIO snap
-  community.general.snap:
-    name: minio
-    channel: edge
-
 - name: Check if LXD is already initialized
   shell: lxc storage list --format=json
   register: lxd_initialized
@@ -68,6 +63,43 @@
   register: result
   until: result.rc == 0
   when: lxd_restart.changed | default(false)
+
+################## Local storage buckets task
+- name: Create MinIO binary directory
+  ansible.builtin.file:
+    path: /opt/minio/bin
+    state: directory
+    mode: '0755'
+
+- name: Download MinIO binaries
+  ansible.builtin.get_url:
+    url: "https://dl.min.io/{{ item.type }}/{{ item.name }}/release/linux-amd64/{{ item.name }}"
+    dest: "/opt/minio/bin/{{ item.name }}"
+    mode: '0755'
+  loop:
+    - { name: minio, type: server }
+    - { name: mc, type: client }
+
+- name: Create symlinks in /usr/local/bin
+  ansible.builtin.file:
+    src: "/opt/minio/bin/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    state: link
+  loop: [minio, mc]
+
+- name: Configure LXD snap for MinIO
+  ansible.builtin.command:
+    cmd: "{{ item }}"
+  loop:
+    - snap set lxd minio.path=/opt/minio/bin
+    - snap restart lxd
+  when: ansible_facts.packages['lxd'][0].source | default('') == 'snap'
+
+- name: Set LXD S3 address
+  ansible.builtin.command:
+    cmd: lxc config set core.storage_buckets_address :8555
+  changed_when: true
+################## Local storage buckets task
 
 - name: Setup LXD UI authentication
   shell: |
