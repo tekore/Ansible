@@ -28,13 +28,13 @@
   copy:
     content: "{{ lxd_preseed | to_nice_yaml }}"
     dest: /tmp/lxd-preseed.yaml
-  when: lxd_initialized.rc != 0
+  when: not lxd_initialized.stat.exists
 
 - name: Initialize LXD with preseed
   shell: cat /tmp/lxd-preseed.yaml | lxd init --preseed
   args:
     executable: /bin/bash
-  when: lxd_initialized.rc != 0
+  when: not lxd_initialized.stat.exists
 
 - name: Enable LXD UI
   shell: snap set lxd ui.enable=true
@@ -119,11 +119,10 @@
   register: lxd_ui_setup
   args:
     executable: /bin/bash
-  register: ui_setup
   changed_when: "'Created TLS identity' in lxd_ui_setup.stdout or 'Created group' in lxd_ui_setup.stdout"
-  when: lxd_initialized.rc != 0
+  when: not lxd_initialized.stat.exists
 
 - name: Display complete output
   ansible.builtin.debug:
     var: lxd_ui_setup.stdout_lines
-  when: ui_setup.changed
+  when: lxd_ui_setup.changed | default(false)
