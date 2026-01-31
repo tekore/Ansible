@@ -20,10 +20,9 @@
     channel: latest/stable
 
 - name: Check if LXD is already initialized
-  shell: lxc storage list --format=json
+  ansible.builtin.stat:
+    path: /var/snap/lxd/common/lxd/database
   register: lxd_initialized
-  failed_when: false
-  changed_when: false
 
 - name: Create LXD preseed configuration
   copy:
