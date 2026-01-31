@@ -48,28 +48,6 @@
   changed_when: false
 
 - name: Display bucket credentials
-  debug:
-    msg:
-      - "========================================="
-      - "LXD S3 Bucket Credentials"
-      - "========================================="
-      - "Bucket Name: {{ bucket_name | default('terraform-state') }}"
-      - "Access Key: {{ parsed_creds.access_key }}"
-      - "Secret Key: {{ parsed_creds.secret_key }}"
-      - "Endpoint: https://{{ lxd_address.stdout }}"
-      - "Region: local"
-      - "========================================="
-      - "Terraform Backend Config:"
-      - "  backend \"s3\" {"
-      - "    bucket   = \"{{ bucket_name | default('terraform-state') }}\""
-      - "    key      = \"terraform.tfstate\""
-      - "    endpoint = \"https://{{ lxd_address.stdout }}\""
-      - "    region   = \"local\""
-      - "    access_key = \"{{ parsed_creds.access_key }}\""
-      - "    secret_key = \"{{ parsed_creds.secret_key }}\""
-      - "    skip_credentials_validation = true"
-      - "    skip_metadata_api_check = true"
-      - "    skip_region_validation = true"
-      - "    force_path_style = true"
-      - "  }"
-      - "========================================="
+  ansible.builtin.debug:
+    var: bucket_create.stdout_lines
+  when: bucket_create.changed

@@ -125,4 +125,4 @@
 - name: Display complete output
   ansible.builtin.debug:
     var: lxd_ui_setup.stdout_lines
-  when: lxd_ui_setup.changed | default(false)
+  when: not lxd_initialized.stat.exists
