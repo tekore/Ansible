@@ -64,42 +64,36 @@
   until: result.rc == 0
   when: lxd_restart.changed | default(false)
 
-################## Local storage buckets task
-- name: Create MinIO binary directory
-  ansible.builtin.file:
-    path: /opt/minio/bin
-    state: directory
-    mode: '0755'
-
-- name: Download MinIO binaries
+- name: Download MinIO binaries to /usr/local/bin
   ansible.builtin.get_url:
     url: "https://dl.min.io/{{ item.type }}/{{ item.name }}/release/linux-amd64/{{ item.name }}"
-    dest: "/opt/minio/bin/{{ item.name }}"
+    dest: "/usr/local/bin/{{ item.name }}"
     mode: '0755'
+    owner: root
+    group: root
+    force: yes
   loop:
     - { name: minio, type: server }
     - { name: mc, type: client }
 
-- name: Create symlinks in /usr/local/bin
-  ansible.builtin.file:
-    src: "/opt/minio/bin/{{ item }}"
-    dest: "/usr/local/bin/{{ item }}"
-    state: link
-  loop: [minio, mc]
-
-- name: Configure LXD snap for MinIO
+- name: Configure LXD snap minio path
   ansible.builtin.command:
-    cmd: "{{ item }}"
-  loop:
-    - snap set lxd minio.path=/opt/minio/bin
-    - snap restart lxd
-  when: ansible_facts.packages['lxd'][0].source | default('') == 'snap'
+    cmd: snap set lxd minio.path=/usr/local/bin
+  changed_when: true
+
+- name: Restart LXD snap
+  ansible.builtin.command:
+    cmd: snap restart lxd
+  changed_when: true
+
+- name: Wait for LXD to be ready
+  ansible.builtin.pause:
+    seconds: 10
 
 - name: Set LXD S3 address
   ansible.builtin.command:
     cmd: lxc config set core.storage_buckets_address :8555
   changed_when: true
-################## Local storage buckets task
 
 - name: Setup LXD UI authentication
   shell: |
