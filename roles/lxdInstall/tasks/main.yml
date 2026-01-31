@@ -95,6 +95,18 @@
     cmd: lxc config set core.storage_buckets_address :8555
   changed_when: true
 
+- name: Check if storage pool exists
+  ansible.builtin.command:
+    cmd: lxc storage show storage-pool
+  register: pool_check
+  failed_when: false
+  changed_when: false
+
+- name: Create storage pool
+  ansible.builtin.command:
+    cmd: lxc storage create storage-pool dir
+  when: pool_check.rc != 0
+
 - name: Setup LXD UI authentication
   shell: |
     lxc auth identity delete tls/lxd-ui 2>/dev/null || true
