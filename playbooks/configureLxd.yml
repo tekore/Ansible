@@ -7,4 +7,5 @@
   roles:
     - lxdInstall
     - lxdBucket
+    - lxdUserCertificate
     - lxdActionsRunner

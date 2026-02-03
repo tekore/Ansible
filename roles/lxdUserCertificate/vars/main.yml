@@ -1,0 +1,4 @@
+---
+
+cert_dir: /root/terraform-lxd-certs
+cert_name: terraform-client
