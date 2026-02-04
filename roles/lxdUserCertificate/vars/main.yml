@@ -1,4 +1,4 @@
 ---
 
-cert_dir: /tekore/terraform-lxd-certs
+cert_dir: /lxd-certificates/terraform-lxd-certs
 cert_name: terraform-client
