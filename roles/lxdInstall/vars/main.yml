@@ -4,6 +4,8 @@ server_hostname: "lxd-host"
 
 storage_directory: "/Storage"
 
+lxd_trust_password: "Changeme123!"
+
 lxd_preseed:
   config:
     core.https_address: '127.0.0.1:8443'

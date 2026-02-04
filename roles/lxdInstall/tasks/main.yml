@@ -122,6 +122,9 @@
   changed_when: "'Created TLS identity' in lxd_ui_setup.stdout or 'Created group' in lxd_ui_setup.stdout"
   when: not lxd_initialized.stat.exists
 
+- name: Set LXD trust password
+  command: lxc config set core.trust_password "{{ lxd_trust_password }}"
+
 - name: Display complete output
   ansible.builtin.debug:
     var: lxd_ui_setup.stdout_lines
