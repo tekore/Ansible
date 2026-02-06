@@ -31,6 +31,11 @@
     enabled: false
   ignore_errors: true
 
+- name: Ensure SSH service is enabled on boot
+  ansible.builtin.systemd:
+    name: ssh
+    enabled: yes
+
 - name: Reload the SSH service to apply changes
   ansible.builtin.service:
     name: ssh
