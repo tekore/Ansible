@@ -91,7 +91,7 @@
 
 - name: Set LXD S3 address
   ansible.builtin.command:
-    cmd: lxc config set core.storage_buckets_address :8555
+    cmd: lxc config set core.storage_buckets_address '0.0.0.0:8555'
   changed_when: true
 
 - name: Check if storage pool exists
