@@ -45,7 +45,7 @@
   changed_when: true
 
 - name: Install required packages
-  command: lxc exec {{ container_name }} -- apt-get install -y curl jq libicu-dev
+  command: lxc exec {{ container_name }} -- apt-get install -y curl jq libicu-dev unzip
   changed_when: true
 
 - name: Create runner user
