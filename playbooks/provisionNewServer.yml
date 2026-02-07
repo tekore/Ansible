@@ -1,4 +1,5 @@
 ---
+
 - name: Configure New Server via Ansible Pull
   hosts: localhost
   connection: local

@@ -1,4 +1,5 @@
 ---
+
 - name: Configure LXD with a configurable container via Ansible Pull
   hosts: localhost
   connection: local
