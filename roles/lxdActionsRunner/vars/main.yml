@@ -5,15 +5,14 @@ ubuntu_version: "24.04"
 container_memory: "2GB"
 
 runner_user: "runner"
-runner_password: "ChangeMe123!"
 
-github_pat: "github_pat_11EXAMPLE_TOKEN_HERE"
+github_pat: "github_pat_11PAT_TOKEN_HERE"
 github_repo_url: "https://github.com/yourusername/yourrepo"
 github_runner_name: "LXD-Runner"
 
 ansible_repo_url: "https://github.com/tekore/Ansible.git"
 ansible_repo_playbook: "playbooks/configureActionsRunner.yml"
 
-# [Description] Certificates for communicating with the LXD API (Set to 'null' if not needed)
+# [Description] Certificates for communicating with the LXD API (Set to 'null' or delete if not needed)
 cert_dir: /lxd-certificates/terraform-lxd-certs
 cert_name: terraform-client

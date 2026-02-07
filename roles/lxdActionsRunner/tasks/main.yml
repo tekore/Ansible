@@ -62,12 +62,6 @@
     - chmod 0440 /etc/sudoers.d/{{ runner_user }}
   changed_when: true
 
-- name: Set runner user password
-  shell: |
-    lxc exec {{ container_name }} -- bash -c "echo '{{ runner_user }}:{{ runner_password }}' | chpasswd"
-  changed_when: true
-  no_log: true
-
 - name: Create actions-runner directory
   command: lxc exec {{ container_name }} -- su - {{ runner_user }} -c "mkdir -p ~/actions-runner && cd ~/actions-runner"
   changed_when: true
@@ -107,7 +101,6 @@
   changed_when: true
   when: cert_dir is defined and cert_dir and cert_name is defined and cert_name
 
-# [Description] Certificates for communicating with the LXD API
 - name: Transfer LXD certificates to container
   shell: |
     lxc file push {{ cert_dir }}/{{ cert_name }}.{{ item.ext }} {{ container_name }}/home/{{ runner_user }}/.terraform.d/lxd/client.{{ item.ext }}
