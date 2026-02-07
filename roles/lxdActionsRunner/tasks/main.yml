@@ -54,6 +54,14 @@
   failed_when: create_user.rc != 0 and 'already exists' not in create_user.stderr
   changed_when: create_user.rc == 0
 
+- name: Give runner user passwordless sudo
+  command: >
+    lxc exec {{ container_name }} -- {{ item }}
+  loop:
+    - bash -c "echo '{{ runner_user }} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/{{ runner_user }}"
+    - chmod 0440 /etc/sudoers.d/{{ runner_user }}
+  changed_when: true
+
 - name: Set runner user password
   shell: |
     lxc exec {{ container_name }} -- bash -c "echo '{{ runner_user }}:{{ runner_password }}' | chpasswd"
