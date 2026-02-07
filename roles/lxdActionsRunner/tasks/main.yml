@@ -87,15 +87,26 @@
     status_code: 201
   register: registration_token
 
-- name: Configure runner
+- name: Configure and start GitHub runner service
   shell: |
     lxc exec {{ container_name }} -- su - {{ runner_user }} -c "cd ~/actions-runner && ./config.sh --url {{ github_repo_url }} --token {{ registration_token.json.token }} --name {{ github_runner_name }} --unattended --replace"
+    lxc exec {{ container_name }} -- bash -c "cd /home/{{ runner_user }}/actions-runner && ./svc.sh install {{ runner_user }}"
+    lxc exec {{ container_name }} -- bash -c "cd /home/{{ runner_user }}/actions-runner && ./svc.sh start"
   changed_when: true
 
-- name: Install runner as a service
-  command: lxc exec {{ container_name }} -- bash -c "cd /home/{{ runner_user }}/actions-runner && ./svc.sh install {{ runner_user }}"
+- name: Create terraform certificates directory in container
+  command: lxc exec {{ container_name }} -- su - {{ runner_user }} -c "mkdir -p ~/.terraform.d/lxd"
   changed_when: true
+  when: cert_dir is defined and cert_dir and cert_name is defined and cert_name
 
-- name: Start runner service
-  command: lxc exec {{ container_name }} -- bash -c "cd /home/{{ runner_user }}/actions-runner && ./svc.sh start"
+# [Description] Certificates for communicating with the LXD API
+- name: Transfer LXD certificates to container
+  shell: |
+    lxc file push {{ cert_dir }}/{{ cert_name }}.{{ item.ext }} {{ container_name }}/home/{{ runner_user }}/.terraform.d/lxd/client.{{ item.ext }}
+    lxc exec {{ container_name }} -- chown {{ runner_user }}:{{ runner_user }} /home/{{ runner_user }}/.terraform.d/lxd/client.{{ item.ext }}
+    lxc exec {{ container_name }} -- chmod {{ item.mode }} /home/{{ runner_user }}/.terraform.d/lxd/client.{{ item.ext }}
+  loop:
+    - { ext: 'crt', mode: '644' }
+    - { ext: 'key', mode: '600' }
   changed_when: true
+  when: cert_dir is defined and cert_dir and cert_name is defined and cert_name
