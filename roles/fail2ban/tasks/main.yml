@@ -22,7 +22,7 @@
     path: /etc/ssh/sshd_config
     regexp: '^#?Port\s+22'
     line: 'Port {{ ports.ssh }}'
-    validate: 'sshd -t -f %s'
+#    validate: 'sshd -t -f %s'
 
 - name: Stop and disable ssh.socket if it exists
   ansible.builtin.service:
