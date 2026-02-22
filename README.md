@@ -31,8 +31,9 @@ ansible-pull -U https://github.com/tekore/Ansible.git -i localhost, playbooks/pr
 
 #### Web interface access of services set up by these playbooks can be achieved via SSH tunnels like below
 ```sh
-ssh -L 8443:localhost:8443 <USER>@<SERVER_IP> -p <SSH_PORT>
+ssh -L 8443:localhost:8443 -A <USER>@<SERVER_IP> -p <SSH_PORT>
 ```
+###### (Note: -A is here for agent forwarding, useful for SSH)
 
 ## Maintainers
 [@Tekore](https://github.com/tekore)
